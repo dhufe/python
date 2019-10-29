@@ -10,13 +10,13 @@ def pulse_train(t, at, shape):
     """create a train of pulses over $t at times $at and shape $shape"""
     return np.sum(shape(t - at[:,np.newaxis]), axis=0)
 
-def phaseshifting ( alpha, f, t ):
+def phaseshifting ( alpha, f, t , phase = 0):
     """ Creates a phase controlled waveform. alpha describes the switching point """
     omega = np.pi * 2 * f
     w = alpha / omega
     d = np.arange ( .5/f, t[-1], .5/f )
-    d = d - .5*w;
-    y = np.sin( omega * t);
+    d = d - .5*w - phase/omega;
+    y = np.sin( omega * t + phase);
 
     y2 = pulse_train(
         t=t,                           # time domain
@@ -24,6 +24,15 @@ def phaseshifting ( alpha, f, t ):
         shape=rect(w)                  # shape of pulse
     )
     return y*y2
+
+def fhwm ( x, y, trsh = .5):
+    """ calculates the fullwidth height maximum """
+    max_val,max_idx = np.amax(y), np.argmax(y)
+    min_left_idx = np.argmin ( np.abs ( y[0:max_idx - 1] - max_val * trsh ))
+    min_right_idx = np.argmin ( np.abs ( y[max_idx:-1] - max_val * trsh ))
+    min_right_idx += (max_idx - 1)
+    tp = x[min_right_idx] - x[min_left_idx]
+    return min_left_idx, min_right_idx, tp
 
 def PitchDetechtion(Samples,
           fs,
