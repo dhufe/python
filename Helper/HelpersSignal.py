@@ -25,6 +25,15 @@ def phaseshifting ( alpha, f, t , phase = 0):
     )
     return y*y2
 
+def fhwm ( x, y, trsh = .5):
+    """ calculates the fullwidth height maximum """
+    max_val,max_idx = np.amax(y), np.argmax(y)
+    min_left_idx = np.argmin ( np.abs ( y[0:max_idx - 1] - max_val * trsh ))
+    min_right_idx = np.argmin ( np.abs ( y[max_idx:-1] - max_val * trsh ))
+    min_right_idx += (max_idx - 1)
+    tp = x[min_right_idx] - x[min_left_idx]
+    return min_left_idx, min_right_idx, tp
+
 def PitchDetechtion(Samples,
           fs,
           window=np.hanning,
