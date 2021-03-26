@@ -4,8 +4,9 @@ import zipfile
 
 NX = 0
 NY = 0
-
-fileName = 'numpy_mmap/example.npz'
+# colormap
+colormap = 'inferno'
+fileName = 'C:\\Users\\dhufschl\\OneDrive - Bundesanstalt für Materialforschung und -prüfung (BAM)\\FTDT-PALLUP\\2D_FTDT_Result_5.npz'
 
 def npz_headers(npz):
     """Takes a path to an .npz file, which is a Zip archive of .npy files.
@@ -35,12 +36,40 @@ vars = npz_headers ( fileName )
 for n in vars:
     if n[0] == 'P':
         print ( n )
-        NX = n[1][0]
-        NY = n[1][0]
-
+        NFrames = n[1][0]
+        NX = n[1][2]
+        NY = n[1][1]
+    
 nFile = np.load( fileName,  mmap_mode='r')
+dx = nFile['dx']
+dt = nFile['dt']
+c = nFile['c']
+f = nFile['f']
+NSources = nFile['NSources']
+SourceWidth = nFile['SourceWidth']
+SourceGap = nFile['SourceGap']
+
+NAperture = dx * ( NSources * ( SourceGap + SourceWidth ) - SourceGap )
+RNearField = np.power(NAperture , 2.0 ) * f / ( 4 * c )
+
+print ( 'Recorded propagation times: %f us' % ( NFrames * 50 * dt * 1e6 ) )
+print ( 'Recorded propagation distance : %f mm' % ( NFrames * 50 * dt * c * 1e3 ) )
+print ( 'Aperture : %f mm ' %( NAperture * 1e3) )
+print ( 'Points needed : %d' %( RNearField / dx ) )
+print ( 'Nearfield distance : %f mm' % (RNearField*1e3 ) )
+print ( 'Nearfield tof %f us' % (RNearField*1e6/c ))
+
+NXStart = NX//2 - int( .5 * RNearField / dx )
+NXEnd   = NX//2 + int( .5 * RNearField / dx )
+
+NYStart = 100 + 10
+NYEnd   = 100 + int( .5 * RNearField / dx ) + 10
+
+x = np.arange ( -(NX//2)*dx, (NX//2)*dx, dx )
+y = np.arange ( 0, (NY)*dx, dx )
+xx, yy = np.meshgrid( x, y )
 
 fig, ax = plt.subplots(1)
-ax.pcolor ( nFile['P'][:,:] )
-
+ax.pcolor ( xx[NYStart:NYEnd,NXStart:NXEnd], yy[NYStart:NYEnd,NXStart:NXEnd], np.sum(nFile['P'][:,NYStart:NYEnd,NXStart:NXEnd], axis=0) , vmin=-1, vmax=1, cmap=colormap, shading='auto')
+#plt.savefig('FTDT_Test.png', dpi=300)
 plt.show()
