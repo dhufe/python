@@ -136,7 +136,7 @@ fFilt = current_reconstruction ( dF, f, fd )
 fFilt *= 10**(20/-20)
 
 nIndices = np.array ( ( 1.0, 2.0, 4.0, 6.0 )) * fd / df  
-wdths = 2 * np.abs ( fFilt [  np.int_(nIndices) ] ) / N2
+wdths = 2 * np.abs ( fFilt [  np.int_(nIndices) ] ) / N
 print ( wdths )
 dr = np.fft.irfft ( fFilt, N2 )# / N2
 yp = 0
@@ -159,13 +159,13 @@ ax[0].legend( loc='best')
 ax[0].set_ylabel ( r'Pressure / Pa' )
 ax[0].set_xlabel ( r'Time / $\mu$s' )
 
-ax[1].plot ( f*1e-3, 1e3 * 2 * np.abs(dF) / N2, 'k-', label=r'Input spectrum' )
+ax[1].plot ( f*1e-3, 1e3 * 2 * np.abs(dF) / N, 'k-', label=r'Input spectrum' )
 ax[1].set_xlim ( 0, Fend )
 ax[1].legend( loc='best')
 ax[1].set_ylabel ( r'Pressure / Pa' )
 ax[1].set_xlabel ( r'Frequency / kHz' )
 
-ax[2].plot ( f*1e-3, 1e3*2 * np.abs(fFilt) / N2 , 'k', label=r'Comp filtered spectrum' )
+ax[2].plot ( f*1e-3, 1e3*2 * np.abs(fFilt) / N , 'k', label=r'Comp filtered spectrum' )
 ax[2].set_xlim ( 0, Fend )
 ax[2].legend( loc='best')
 ax[2].set_ylabel ( r'Pressure / Pa' )
